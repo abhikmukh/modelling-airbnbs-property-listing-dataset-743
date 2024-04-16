@@ -30,11 +30,12 @@ class CleanTabularData:
     def set_default_feature_values(self) -> pd.DataFrame:
         list_of_columns = ["bedrooms", "bathrooms", "beds", "guests"]
         for col in list_of_columns:
-            self.df[col].fillna(1, inplace=True)
-            return self.df
+            self.df[col].fillna(1.0, inplace=True)
+        return self.df
 
 
 def load_airbnb_data(data_df, label_column):
+
     features = data_df.drop(columns=[label_column])  # Drop the label column to get features
     labels = data_df[label_column]  # Extract the label column
 
