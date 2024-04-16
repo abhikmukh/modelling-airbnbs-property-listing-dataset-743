@@ -1,4 +1,6 @@
+from eda_utils import DataFrameInfo
 from tabular_data import load_airbnb_data
+
 import pandas as pd
 import itertools
 import typing
@@ -10,10 +12,16 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
 import joblib
 import json
 import os
-from sklearn.model_selection import GridSearchCV
+import warnings
+warnings.filterwarnings("ignore", category=Warning)
+
 
 
 def read_json_file(file_path):
@@ -25,6 +33,20 @@ def read_json_file(file_path):
 def load_model(model_name):
     """Loads a model from the models directory."""
     return joblib.load(f"models/regression/{model_name}/{model_name}.joblib")
+
+
+def get_list_of_skewed_columns(data):
+    """Checks the skewness of a dataset."""
+    list_of_skewed_columns = data.columns[data.skew() > 3].tolist()
+    return list_of_skewed_columns
+
+
+def drop_outliers(data, column_list):
+    dataframe_info = DataFrameInfo()
+    for column in column_list:
+        outliers = dataframe_info.calculate_iqr_outliers(data, column)
+        data = data.drop(outliers.index)
+        return data
 
 
 def _grid_search(hyperparameters: typing.Dict[str, typing.Iterable]):
@@ -53,12 +75,13 @@ def custom_tune_regression_model_hyperparameters(model, features, labels, param_
     return metric_dict, best_hyperparams
 
 
-def tune_regression_model_hyperparameters(model, features, labels, param_dict):
+def _tune_regression_model_hyperparameters(model, X_train, y_train, param_dict):
     """Tunes the hyperparameters of a regression model using grid search."""
     model_instance = model()
     grid_search = GridSearchCV(model_instance, param_dict, cv=5, scoring="neg_root_mean_squared_error")
-    grid_search.fit(features, labels)
-    return grid_search, abs(grid_search.best_score_), grid_search.best_params_  # Return the absolute best RMSE score
+    grid_search.fit(X_train, y_train)
+
+    return grid_search.best_params_  # Return the absolute best RMSE score
 
 
 def save_model(model, model_name, best_hyperparams, best_score):
@@ -71,7 +94,7 @@ def save_model(model, model_name, best_hyperparams, best_score):
         json.dump(best_score, f)
 
 
-def evaluate_all_models(list_of_models, params, features, labels):
+def evaluate_all_models(list_of_models, params, X_train, y_train, X_val, y_val):
     """Evaluates a list of models using grid search and saves the best model."""
     param_dict = read_json_file(params)
 
@@ -79,28 +102,32 @@ def evaluate_all_models(list_of_models, params, features, labels):
     for model_name in list_of_models:
         model_instance = eval(model_name)  # Convert string to class
 
-        model, best_score, best_parameters = (tune_regression_model_hyperparameters(model_instance,
-                                              features, labels, param_dict[model_name]["params"]))
+        best_parameters = (_tune_regression_model_hyperparameters(model_instance,
+                                              X_train, y_train, param_dict[model_name]["params"]))
+        model_with_best_parameters = model_instance(**best_parameters)
+        model_with_best_parameters.fit(X_train, y_train)
+        best_validation_rmse = root_mean_squared_error(y_val, model_with_best_parameters.predict(X_val))
 
-        save_model(model, model_name, best_parameters, best_score)
         results_dict[model_name] = {
             'best_params': best_parameters,
-            'best_score': best_score
+            'best_validation_rmse': best_validation_rmse
         }
+        save_model(model_with_best_parameters, model_name, best_parameters, best_validation_rmse)
+
     return results_dict
 
 
 def find_best_model(result_dict):
     """Finds the best model from a dictionary of results."""
     best_score = np.inf
-    best_model = None
+    best_performing_model = None
     best_params = None
     for model, model_results in result_dict.items():
-        if model_results['best_score'] < best_score:
-            best_score = model_results['best_score']
-            best_model = model
+        if model_results['best_validation_rmse'] < best_score:
+            best_score = model_results['best_validation_rmse']
+            best_performing_model = model
             best_params = model_results['best_params']
-    return best_model, best_score, best_params
+    return best_performing_model, best_score, best_params
 
 
 if __name__ == "__main__":
@@ -108,14 +135,29 @@ if __name__ == "__main__":
     df = pd.read_csv("data/cleaned_data.csv")
     df.drop(columns=["Unnamed: 19"], inplace=True)
     data_df = df.select_dtypes(include=np.number)
+    data_df = drop_outliers(data_df, get_list_of_skewed_columns(data_df))
 
     X, y = load_airbnb_data(data_df, "Price_Night")
+    pipeline = Pipeline([
+        ('scaling', StandardScaler()),
+    ])
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train, test_size=0.3, random_state=1)
+    X = pipeline.fit_transform(X)
+    print(f"Shape of features {X.shape}")
+    print(f"Shape of labels {y.shape}")
 
-    sgd_regressor = SGDRegressor()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1)
+    X_test, X_val, y_test, y_val = train_test_split(
+        X_test, y_test, test_size=0.3, random_state=1)
+
+    print(f"Shape of training features {X_train.shape}")
+    print(f"Shape of validation features {X_val.shape}")
+    print(f"Shape of test features {X_test.shape}")
+    print(f"Shape of training labels {y_train.shape}")
+    print(f"Shape of validation labels {y_val.shape}")
+    print(f"Shape of test labels {y_test.shape}")
+
+    sgd_regressor = SGDRegressor()  # Baseline model
     sgd_regressor.fit(X_train, y_train)
     y_hat = sgd_regressor.predict(X_train)
     y_val_hat = sgd_regressor.predict(X_val)
@@ -124,18 +166,16 @@ if __name__ == "__main__":
     print(f"Baseline model validation loss : {root_mean_squared_error(y_val, y_val_hat)}")
     print(f"Baseline model test loss : {root_mean_squared_error(y_test, y_test_hat)}")
 
-    models = ["DecisionTreeRegressor", "RandomForestRegressor", "GradientBoostingRegressor"]
+    models = ["DecisionTreeRegressor", "RandomForestRegressor", "GradientBoostingRegressor", "SGDRegressor"]
 
-    results = evaluate_all_models(models, "models/params.json", features=X_val, labels=y_val)
+    results = evaluate_all_models(models, "models/params.json", X_train, y_train, X_val, y_val)
     print(f"Best model, validation rmse and parameters : {find_best_model(results)}")
 
     best_model_dict = find_best_model(results)
     best_model = load_model(best_model_dict[0])
     best_model.fit(X_train, y_train)
     y_pred = best_model.predict(X_test)
-    best_model_test_loss = root_mean_squared_error(y_test, y_pred)
-    print(f"Best model test loss : {best_model_test_loss}")
-
-
-
-
+    print(f"Best model test set rmse : {root_mean_squared_error(y_test, y_pred)}")
+    print(f"Best model test set r2 score : {r2_score(y_test, y_pred)}")
+    print(f"Best model test set mae : {mean_absolute_error(y_test, y_pred)}")
+    print(f"Best model test set mse : {mean_squared_error(y_test, y_pred)}")
