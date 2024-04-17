@@ -33,13 +33,6 @@ if __name__ == "__main__":
     X_test, X_val, y_test, y_val = train_test_split(
         X_test, y_test, test_size=0.3, random_state=1)
 
-    print(f"Shape of training features {X_train.shape}")
-    print(f"Shape of validation features {X_val.shape}")
-    print(f"Shape of test features {X_test.shape}")
-    print(f"Shape of training labels {y_train.shape}")
-    print(f"Shape of validation labels {y_val.shape}")
-    print(f"Shape of test labels {y_test.shape}")
-
     sgd_regressor = SGDRegressor()  # Baseline model
     sgd_regressor.fit(X_train, y_train)
     y_hat = sgd_regressor.predict(X_train)
