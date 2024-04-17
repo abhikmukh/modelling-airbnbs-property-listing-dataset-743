@@ -1,0 +1,50 @@
+{
+    "DecisionTreeClassifier": {
+        "model": "DecisionTreeClassifier",
+        "params": {
+            "ccp_alpha": [0.1, 0.01, 0.001],
+            "max_depth" : [5, 6, 7, 8, 9],
+            "criterion" :["gini", "entropy"]
+             }
+    },
+    "RandomForestClassifier": {
+        "model": "RandomForestClassifier",
+        "params": {
+            "n_estimators": [200, 500],
+            "max_depth" : [4,5,6,7,8],
+            "criterion" :["gini", "entropy"]
+        }
+    },
+    "GradientBoostingClassifier": {
+        "model": "GradientBoostingClassifier",
+        "params": {
+            "learning_rate": [
+                0.01,
+                0.1,
+                0.2
+            ],
+            "min_samples_leaf": [
+                0.1,
+                0.3,
+                0.5
+            ],
+            "max_depth": [
+                3,
+                5,
+                8
+            ],
+            "max_features": [
+                "log2",
+                "sqrt"
+            ],
+            "criterion": [
+                "friedman_mse",
+                "squared_error"
+            ],
+            "n_estimators": [
+                10,
+                100
+            ]
+        }
+    }
+}

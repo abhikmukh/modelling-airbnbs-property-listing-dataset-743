@@ -23,7 +23,6 @@ import warnings
 warnings.filterwarnings("ignore", category=Warning)
 
 
-
 def read_json_file(file_path):
     """Reads a JSON file and returns a dictionary."""
     with open(file_path, "r") as f:
@@ -168,7 +167,7 @@ if __name__ == "__main__":
 
     models = ["DecisionTreeRegressor", "RandomForestRegressor", "GradientBoostingRegressor", "SGDRegressor"]
 
-    results = evaluate_all_models(models, "models/params.json", X_train, y_train, X_val, y_val)
+    results = evaluate_all_models(models, "models/regression_hyperparameters.json", X_train, y_train, X_val, y_val)
     print(f"Best model, validation rmse and parameters : {find_best_model(results)}")
 
     best_model_dict = find_best_model(results)
