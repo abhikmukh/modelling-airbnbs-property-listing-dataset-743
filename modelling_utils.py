@@ -2,6 +2,8 @@ import json
 import os
 import joblib
 import numpy as np
+from enum import Enum
+import torch
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, RandomForestRegressor, \
@@ -10,6 +12,11 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.linear_model import SGDRegressor
 
 from eda_utils import DataFrameInfo
+
+
+class MLMethod(Enum):
+    SK_LEARN = "sk-learn"
+    TORCH = "torch"
 
 
 def read_json_file(file_path):
@@ -46,17 +53,28 @@ def _tune_model_hyperparameters(model, X_train, y_train, param_dict):
     return grid_search.best_params_  #
 
 
-def save_model(model, model_name, best_hyperparams, best_score, task_type):
+def save_model(ml_method, model, best_hyperparams, task_type, best_score=None, metrics= None, model_name=None, time_stamp=None):
     """Saves a model to the models directory."""
-    os.makedirs(f"models/{task_type}/{model_name}", exist_ok=True)
-    joblib.dump(model, f"models/{task_type}/{model_name}/{model_name}.joblib")
-    with open(f"models/{task_type}/{model_name}/{model_name}_best_hyperparams.json", "w") as f:
-        json.dump(best_hyperparams, f)
-    with open(f"models/{task_type}/{model_name}/{model_name}_best_score.json", "w") as f:
-        json.dump(best_score, f)
+    if ml_method == "sk-learn":
+        model_file_path = f"models/{task_type}/{model_name}"
+        os.makedirs(f"{model_file_path}", exist_ok=True)
+        joblib.dump(model, f"{model_file_path}/{model_name}.joblib")
+        with open(f"{model_file_path}/{model_name}_best_hyperparams.json", "w") as f:
+            json.dump(best_hyperparams, f)
+        with open(f"{model_file_path}/{model_name}_best_score.json", "w") as f:
+            json.dump(best_score, f)
+    elif ml_method == "torch":
+        model_file_path = f"models/neural_network/{task_type}/{time_stamp}"
+        os.makedirs(model_file_path, exist_ok=True)
+        torch.save(model, f"{model_file_path}/model.pt")
+        with open(f"{model_file_path}/model_best_hyperparams.json", "w") as f:
+            json.dump(best_hyperparams, f)
+        with open(f"{model_file_path}/model_best_score.json", "w") as f:
+            json.dump(metrics, f)
 
 
-def evaluate_all_models(list_of_models, params, X_train, y_train, X_val, y_val, scoring_metric, task_type):
+def evaluate_all_models(ml_method, list_of_models, params, X_train, y_train, X_val, y_val,
+                        scoring_metric, task_type):
     """Evaluates a list of models using grid search and saves the best model."""
     param_dict = read_json_file(params)
 
@@ -74,7 +92,8 @@ def evaluate_all_models(list_of_models, params, X_train, y_train, X_val, y_val, 
             'best_params': best_parameters,
             'best_validation_score': best_validation_score
         }
-        save_model(model_with_best_parameters, model_name, best_parameters, best_validation_score, task_type)
+        save_model(ml_method="sk-learn", model=model_with_best_parameters, model_name=model_name,
+                   best_hyperparams=best_parameters, best_score=best_validation_score, task_type=task_type)
 
     return results_dict
 
