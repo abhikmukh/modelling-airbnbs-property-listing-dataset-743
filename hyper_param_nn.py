@@ -209,6 +209,7 @@ def neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10):
                 best_trained_model.load_state_dict(data["net_state_dict"])
 
     test_metrics_dict = test_accuracy(best_trained_model, data_dir)
+
     print(f"Best trial test set mse: {test_metrics_dict['test_mse_loss']}")
     print(f"Best model's test metrics {test_metrics_dict}")
 

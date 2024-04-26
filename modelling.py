@@ -6,7 +6,6 @@ if __name__ == "__main__":
     """
     This script runs the hyperparameter tuning for classification, regression and neural network models.
     """
-
-    neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10)
     classification_hyper_tune()
     regression_hyper_tune()
+    neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10)
