@@ -32,7 +32,7 @@
             "alpha": [0.1, 0.01, 0.001, 0.0001], 
             "l1_ratio": [1, 0.7, 0.5, 0.2, 0], 
             "eta0": [0.01, 0.001, 0.0001],
-            "max_iter": [1000, 10000],
+            "max_iter": [1000, 100000],
             "learning_rate": ["constant", "optimal", "invscaling", "adaptive"]
         }
     }

@@ -25,17 +25,6 @@ from modelling_utils import save_model
 RAY_CHDIR_TO_TRIAL_DIR = 0
 
 
-def get_nn_config(file_name) -> dict:
-    """
-    Read the database credentials from the yaml file
-    :return:
-    """
-    # full_file_path = os.path.join(self.base_path, self.cred_file)
-    with open(file_name, 'r') as file:
-        config = yaml.safe_load(file)
-        return config
-
-
 class AirbnbNightlyPriceRegressionDataset(Dataset):
     def __init__(self, data_dir):
         super().__init__()
@@ -182,7 +171,7 @@ def test_accuracy(model, data_dir):
     return metrics_dict
 
 
-def main(num_samples=10, max_num_epochs=10):
+def neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10):
     data_dir = os.path.abspath("./data")
 
     config = {
@@ -221,7 +210,7 @@ def main(num_samples=10, max_num_epochs=10):
 
     test_metrics_dict = test_accuracy(best_trained_model, data_dir)
     print(f"Best trial test set mse: {test_metrics_dict['test_mse_loss']}")
-    print(test_metrics_dict)
+    print(f"Best model's test metrics {test_metrics_dict}")
 
     t = time.localtime()
     timestamp = time.strftime('%b-%d-%Y_%H%M', t)
@@ -230,6 +219,6 @@ def main(num_samples=10, max_num_epochs=10):
 
 
 if __name__ == "__main__":
-    main(num_samples=10, max_num_epochs=10)
+    neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10)
 
 
