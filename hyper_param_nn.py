@@ -28,7 +28,7 @@ RAY_CHDIR_TO_TRIAL_DIR = 0
 
 
 class NN(torch.nn.Module):
-    def __init__(self, hidden_size, num_layers, input_size=12, output_size=1):
+    def __init__(self, input_size, hidden_size, num_layers, output_size=1):
         super().__init__()
 
         internal_layers = [torch.nn.Linear(input_size, hidden_size), torch.nn.ReLU()]
@@ -50,8 +50,10 @@ def load_data(torch_dataset):
 
 
 def train_loop(config, data_set, checkpoint_dir=None):
-    airbnb_dataset = data_set
-    nn_model = NN(config["hidden_size"], config["num_layers"])
+
+    features, _ = data_set[0]
+    input_size = list(features.shape)[0]
+    nn_model = NN(input_size=input_size, hidden_size=config["hidden_size"], num_layers=config["num_layers"])
 
     # set optimizer
     if config['optimizer'] == 'sgd':
@@ -67,8 +69,7 @@ def train_loop(config, data_set, checkpoint_dir=None):
         nn_model.load_state_dict(model_state)
         optimizer.load_state_dict(optimizer_state)
 
-
-    trainset, testset = load_data(airbnb_dataset)
+    trainset, testset = load_data(data_set)
     testset, valset = torch.utils.data.random_split(testset, [0.5, 0.5])
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=config["batch_size"], shuffle=True,
@@ -82,7 +83,6 @@ def train_loop(config, data_set, checkpoint_dir=None):
         running_loss = 0.0
         epoch_steps = 0
         for batch in trainloader:
-            print(batch)
             # get the inputs; data is a list of [inputs, labels]
             features, labels = batch
 
@@ -155,6 +155,8 @@ def test_accuracy(model, data_set):
 
 def neural_net_hyper_param_tune(data_dir, data_set, num_samples=10, max_num_epochs=10):
     data_dir = os.path.abspath(data_dir)
+    features, _ = data_set[0]
+    input_size = list(features.shape)[0]
 
     config = {
         "learning_rate": tune.loguniform(1e-4, 1e-1),
@@ -181,7 +183,8 @@ def neural_net_hyper_param_tune(data_dir, data_set, num_samples=10, max_num_epoc
     print(f"Best trial config: {best_trial.config}")
     print(f"Best trial final validation loss: {best_trial.last_result['loss']}")
 
-    best_trained_model = NN(best_trial.config["hidden_size"], best_trial.config["num_layers"])
+    best_trained_model = NN(input_size=input_size, hidden_size=best_trial.config["hidden_size"],
+                            num_layers=best_trial.config["num_layers"])
 
     if train.get_checkpoint():
         with train.get_checkpoint().as_directory() as checkpoint_dir:

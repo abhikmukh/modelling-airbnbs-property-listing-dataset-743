@@ -19,6 +19,7 @@ def create_inputs_for_ml(data_dir, csv_data, label_column, list_of_columns_to_dr
 
     X, y = load_airbnb_data(df, label_column)
     X = X.select_dtypes(include=np.number)
+    print(X.head())
     return X, y
 
 
@@ -36,7 +37,7 @@ class AirbnbNightlyPriceRegressionDataset(Dataset):
 
         example = numerical_data.iloc[index]
         features = torch.tensor(example.drop(columns=self.label))
-        label = torch.tensor(example["Price_Night"])
+        label = torch.tensor(example[self.label])
 
         return features, label
 
@@ -49,7 +50,8 @@ if __name__ == "__main__":
     This script runs the hyperparameter tuning for classification, regression and neural network models.
     """
     torch_data_set = AirbnbNightlyPriceRegressionDataset(data_dir="./data", csv_data="cleaned_data.csv",
-                                                         label_column="Price_Night")
+                                                         label_column="Price_Night",
+                                                         list_of_columns_to_drop=["Unnamed: 19"])
     features_regression, label_regression = create_inputs_for_ml(data_dir="./data",
                                                                  csv_data="cleaned_data.csv",
                                                                  list_of_columns_to_drop=["Unnamed: 19"],
@@ -61,8 +63,8 @@ if __name__ == "__main__":
 
     classification_accuracy_score = classification_hyper_tune(features_classification, label_classification)
     regression_mse_loss = regression_hyper_tune(features_regression, label_regression)
-    nn_regression_mse_loss = neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10, data_dir="./data",
-                                                         data_set=torch_data_set)
+    nn_regression_mse_loss = neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10,
+                                                         data_dir="./data", data_set=torch_data_set)
 
     print(f"Classification accuracy score : {classification_accuracy_score}")
     print(f"Regression mse loss : {regression_mse_loss}")
