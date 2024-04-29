@@ -11,12 +11,13 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 import pandas as pd
+import os
 import modelling_utils
 
 
-def classification_hyper_tune():
+def classification_hyper_tune(data_dir, csv_data, list_of_columns_to_drop=None, label_column=None):
     np.random.seed(42)
-    df = pd.read_csv("data/cleaned_data.csv")
+    df = pd.read_csv(os.path.join(data_dir, csv_data))
     df.drop(columns=["Unnamed: 19"], inplace=True)
     df['Category'] = df['Category'].str.replace(r'Amazing pools,Stunning Cotswolds Water Park, sleeps 6 with pool',
                                                 'Amazing pools', regex=True)
@@ -65,8 +66,7 @@ def classification_hyper_tune():
     print(f"Precision of best classification model on test data : {precision_score(y_test, y_pred, average='weighted')}")
     print(f"Recall of best classification model on test data : {recall_score(y_test, y_pred, average='weighted')}")
     print(f"F1 score of best classification model on test data : {f1_score(y_test, y_pred, average='weighted')}")
+    return accuracy_score(y_test, y_pred)
 
 
-if __name__ == "__main__":
-    classification_hyper_tune()
 
