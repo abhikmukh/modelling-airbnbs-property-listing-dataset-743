@@ -27,28 +27,8 @@ from modelling_utils import save_model
 RAY_CHDIR_TO_TRIAL_DIR = 0
 
 
-class AirbnbNightlyPriceRegressionDataset(Dataset):
-    def __init__(self, data_dir, csv_data):
-        super().__init__()
-
-        self.data = pd.read_csv(os.path.join(data_dir, csv_data))
-
-    def __getitem__(self, index):
-        numerical_data = self.data.select_dtypes(include=np.number)
-        numerical_data.drop(columns=["Unnamed: 19"], inplace=True)
-        example = numerical_data.iloc[index]
-        features = torch.tensor(example.drop(columns=["Price_Night"]))
-
-        label = torch.tensor(example["Price_Night"])
-
-        return features, label
-
-    def __len__(self):
-        return len(self.data)
-
-
 class NN(torch.nn.Module):
-    def __init__(self, hidden_size, num_layers, input_size=11, output_size=1):
+    def __init__(self, hidden_size, num_layers, input_size=12, output_size=1):
         super().__init__()
 
         internal_layers = [torch.nn.Linear(input_size, hidden_size), torch.nn.ReLU()]
@@ -69,8 +49,8 @@ def load_data(torch_dataset):
     return train_dataset, test_dataset
 
 
-def train_loop(config, csv_data=None, checkpoint_dir=None, data_dir=None):
-    airbnb_dataset = AirbnbNightlyPriceRegressionDataset(data_dir, csv_data)
+def train_loop(config, data_set, checkpoint_dir=None):
+    airbnb_dataset = data_set
     nn_model = NN(config["hidden_size"], config["num_layers"])
 
     # set optimizer
@@ -142,9 +122,9 @@ def train_loop(config, csv_data=None, checkpoint_dir=None, data_dir=None):
     print("Finished Training")
 
 
-def test_accuracy(model, data_dir, csv_data):
+def test_accuracy(model, data_set):
     start = timer()
-    airbnb_dataset = AirbnbNightlyPriceRegressionDataset(data_dir, csv_data)
+    airbnb_dataset = data_set
     trainset, testset = load_data(airbnb_dataset)
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=4, shuffle=False,
@@ -173,7 +153,7 @@ def test_accuracy(model, data_dir, csv_data):
     return metrics_dict
 
 
-def neural_net_hyper_param_tune(data_dir, csv_data, num_samples=10, max_num_epochs=10):
+def neural_net_hyper_param_tune(data_dir, data_set, num_samples=10, max_num_epochs=10):
     data_dir = os.path.abspath(data_dir)
 
     config = {
@@ -191,7 +171,7 @@ def neural_net_hyper_param_tune(data_dir, csv_data, num_samples=10, max_num_epoc
         reduction_factor=2,
     )
     result = tune.run(
-        partial(train_loop, data_dir=data_dir, csv_data=csv_data),
+        partial(train_loop, data_set=data_set),
         config=config,
         num_samples=num_samples,
         scheduler=scheduler,
@@ -210,7 +190,7 @@ def neural_net_hyper_param_tune(data_dir, csv_data, num_samples=10, max_num_epoc
 
                 best_trained_model.load_state_dict(data["net_state_dict"])
 
-    test_metrics_dict = test_accuracy(best_trained_model, data_dir, csv_data=csv_data)
+    test_metrics_dict = test_accuracy(best_trained_model, data_set)
 
     print(f"Best trial test set mse: {test_metrics_dict['test_mse_loss']}")
     print(f"Best model's test metrics {test_metrics_dict}")
@@ -221,9 +201,5 @@ def neural_net_hyper_param_tune(data_dir, csv_data, num_samples=10, max_num_epoc
                metrics=test_metrics_dict, task_type="regression", time_stamp=timestamp)
 
     return test_metrics_dict['test_mse_loss']
-
-
-if __name__ == "__main__":
-    neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10, data_dir="./data", csv_data="cleaned_data.csv")
 
 

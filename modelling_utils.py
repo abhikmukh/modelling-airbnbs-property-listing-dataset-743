@@ -11,7 +11,6 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.linear_model import SGDRegressor
 
-from eda_utils import DataFrameInfo
 from enum import Enum
 
 
@@ -29,20 +28,6 @@ def read_json_file(file_path):
 def load_model(model_name, task_type):
     """Loads a model from the models directory."""
     return joblib.load(f"models/{task_type}/{model_name}/{model_name}.joblib")
-
-
-def get_list_of_skewed_columns(data):
-    """Checks the skewness of a dataset."""
-    list_of_skewed_columns = data.columns[data.skew() > 3].tolist()
-    return list_of_skewed_columns
-
-
-def drop_outliers(data, column_list):
-    dataframe_info = DataFrameInfo()
-    for column in column_list:
-        outliers = dataframe_info.calculate_iqr_outliers(data, column)
-        data = data.drop(outliers.index)
-        return data
 
 
 def _tune_model_hyperparameters(model, X_train, y_train, param_dict):

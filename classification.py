@@ -15,17 +15,10 @@ import os
 import modelling_utils
 
 
-def classification_hyper_tune(data_dir, csv_data, list_of_columns_to_drop=None, label_column=None):
-    np.random.seed(42)
-    df = pd.read_csv(os.path.join(data_dir, csv_data))
-    df.drop(columns=["Unnamed: 19"], inplace=True)
-    df['Category'] = df['Category'].str.replace(r'Amazing pools,Stunning Cotswolds Water Park, sleeps 6 with pool',
-                                                'Amazing pools', regex=True)
+def classification_hyper_tune(features, label):
+    X= features
+    y = label
 
-    data_df = df.select_dtypes(include=np.number)
-    data_df = modelling_utils.drop_outliers(data_df, modelling_utils.get_list_of_skewed_columns(data_df))
-    data_df["Category"] = df["Category"]
-    X, y = load_airbnb_data(data_df, "Category")
     pipeline = Pipeline([
         ('scaling', StandardScaler()),
     ])

@@ -1,6 +1,9 @@
 import pandas as pd
 from ast import literal_eval
 
+import modelling_utils
+from eda_utils import DataFrameInfo
+
 
 class CleanTabularData:
     def __init__(self, df: pd.DataFrame):
@@ -33,6 +36,21 @@ class CleanTabularData:
             self.df[col].fillna(1.0, inplace=True)
         return self.df
 
+    def clean_category_column(self) -> pd.DataFrame:
+        self.df['Category'] = \
+            self.df['Category'].str.replace(r'Amazing pools,Stunning Cotswolds Water Park, sleeps 6 with pool',
+                                            'Amazing pools', regex=True)
+        return self.df
+
+    def drop_outliers(self):
+        dataframe_info = DataFrameInfo()
+        numeric_df = self.df.select_dtypes(include=['float64', 'int64'])
+        column_list = numeric_df.columns[numeric_df.skew() > 3].tolist()
+        for column in column_list:
+            outliers = dataframe_info.calculate_iqr_outliers(self.df, column)
+            self.df = self.df.drop(outliers.index)
+        return self.df
+
 
 def load_airbnb_data(data_df, label_column):
 
@@ -44,14 +62,14 @@ def load_airbnb_data(data_df, label_column):
 
 if __name__ == "__main__":
     df = pd.read_csv("data/listing.csv")
-    print(df.shape)
-    cleaner = CleanTabularData(df)
-    cleaner.remove_rows_with_missing_ratings()
-    print(df.shape)
-    cleaner.combine_description_strings()
-    print(df.shape)
+    cleaner_df = CleanTabularData(df)
 
-    cleaner.set_default_feature_values()
-    cleaner.df.to_csv("data/cleaned_data.csv", index=False)
+    cleaner_df.remove_rows_with_missing_ratings()
+    cleaner_df.combine_description_strings()
+
+    cleaner_df.set_default_feature_values()
+    cleaner_df.drop_outliers()
+
+    cleaner_df.df.to_csv("data/cleaned_data.csv", index=False)
 
 

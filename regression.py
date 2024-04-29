@@ -15,20 +15,14 @@ import modelling_utils
 from tabular_data import load_airbnb_data
 
 
-def regression_hyper_tune(data_dir, csv_data, list_of_columns_to_drop=None, label_column=None):
-    np.random.seed(42)
-    df = pd.read_csv(os.path.join(data_dir, csv_data))
-    df.drop(columns=list_of_columns_to_drop, inplace=True)
-    data_df = df.select_dtypes(include=np.number)
-    data_df = modelling_utils.drop_outliers(data_df, modelling_utils.get_list_of_skewed_columns(data_df))
+def regression_hyper_tune(features, label):
 
-    X, y = load_airbnb_data(data_df, label_column)
     pipeline = Pipeline([
         ('scaling', StandardScaler()),
     ])
 
-    X = pipeline.fit_transform(X)
-
+    X = pipeline.fit_transform(features)
+    y = label
     print(f" ------ Result of Regression task ------")
 
     print(f"Shape of features {X.shape}")
