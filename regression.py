@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 from sklearn.linear_model import SGDRegressor
 from sklearn.pipeline import Pipeline
@@ -14,20 +15,14 @@ import modelling_utils
 from tabular_data import load_airbnb_data
 
 
-def regression_hyper_tune():
-    np.random.seed(42)
-    df = pd.read_csv("data/cleaned_data.csv")
-    df.drop(columns=["Unnamed: 19"], inplace=True)
-    data_df = df.select_dtypes(include=np.number)
-    data_df = modelling_utils.drop_outliers(data_df, modelling_utils.get_list_of_skewed_columns(data_df))
+def regression_hyper_tune(features, label):
 
-    X, y = load_airbnb_data(data_df, "Price_Night")
     pipeline = Pipeline([
         ('scaling', StandardScaler()),
     ])
 
-    X = pipeline.fit_transform(X)
-
+    X = pipeline.fit_transform(features)
+    y = label
     print(f" ------ Result of Regression task ------")
 
     print(f"Shape of features {X.shape}")
@@ -64,7 +59,4 @@ def regression_hyper_tune():
     print(f"Best model test set r2_score : {r2_score(y_test, y_pred)}")
     print(f"Best model test set mae : {mean_absolute_error(y_test, y_pred)}")
     print(f"Best model test set mse : {mean_squared_error(y_test, y_pred)}")
-
-
-if __name__ == "__main__":
-    regression_hyper_tune()
+    return mean_squared_error(y_test, y_pred)

@@ -11,20 +11,14 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 import pandas as pd
+import os
 import modelling_utils
 
 
-def classification_hyper_tune():
-    np.random.seed(42)
-    df = pd.read_csv("data/cleaned_data.csv")
-    df.drop(columns=["Unnamed: 19"], inplace=True)
-    df['Category'] = df['Category'].str.replace(r'Amazing pools,Stunning Cotswolds Water Park, sleeps 6 with pool',
-                                                'Amazing pools', regex=True)
+def classification_hyper_tune(features, label):
+    X= features
+    y = label
 
-    data_df = df.select_dtypes(include=np.number)
-    data_df = modelling_utils.drop_outliers(data_df, modelling_utils.get_list_of_skewed_columns(data_df))
-    data_df["Category"] = df["Category"]
-    X, y = load_airbnb_data(data_df, "Category")
     pipeline = Pipeline([
         ('scaling', StandardScaler()),
     ])
@@ -65,8 +59,7 @@ def classification_hyper_tune():
     print(f"Precision of best classification model on test data : {precision_score(y_test, y_pred, average='weighted')}")
     print(f"Recall of best classification model on test data : {recall_score(y_test, y_pred, average='weighted')}")
     print(f"F1 score of best classification model on test data : {f1_score(y_test, y_pred, average='weighted')}")
+    return accuracy_score(y_test, y_pred)
 
 
-if __name__ == "__main__":
-    classification_hyper_tune()
 
