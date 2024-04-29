@@ -1,15 +1,11 @@
 import os.path
 import time
 from timeit import default_timer as timer
-import os
-import numpy as np
 from torch.utils.data import Dataset
 import torch
 from torcheval.metrics.functional import r2_score
-import yaml
-import pandas as pd
 from functools import partial
-import os, tempfile
+import tempfile
 from ray import tune
 
 import ray.cloudpickle as pickle
@@ -200,7 +196,7 @@ def neural_net_hyper_param_tune(data_dir, data_set, num_samples=10, max_num_epoc
 
     t = time.localtime()
     timestamp = time.strftime('%b-%d-%Y_%H%M', t)
-    save_model(ml_method="torch", model=best_trained_model, best_hyperparams=best_trial.config,
+    save_model(ml_method="torch_nn", model=best_trained_model, best_hyperparams=best_trial.config,
                metrics=test_metrics_dict, task_type="regression", time_stamp=timestamp)
 
     return test_metrics_dict['test_mse_loss']

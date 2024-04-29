@@ -1,5 +1,3 @@
-from tabular_data import load_airbnb_data
-from eda_utils import DataFrameInfo
 from  sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -9,13 +7,15 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
-import numpy as np
 import pandas as pd
-import os
+
 import modelling_utils
 
 
-def classification_hyper_tune(features, label):
+def classification_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> float:
+    """
+
+    """
     X= features
     y = label
 

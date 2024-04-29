@@ -58,6 +58,8 @@ def save_model(ml_method, model, best_hyperparams, task_type, best_score=None, m
             json.dump(best_hyperparams, f)
         with open(f"{model_file_path}/model_best_score.json", "w") as f:
             json.dump(metrics, f)
+    else:
+        raise ValueError("Invalid ml method")
 
 
 def evaluate_all_models(list_of_models, params, X_train, y_train, X_val, y_val,

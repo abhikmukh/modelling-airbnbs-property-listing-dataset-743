@@ -1,7 +1,5 @@
 import pandas as pd
-import numpy as np
-import os
-
+from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import SGDRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -12,10 +10,12 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import root_mean_squared_error
 
 import modelling_utils
-from tabular_data import load_airbnb_data
 
 
-def regression_hyper_tune(features, label):
+def regression_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> float:
+    """
+    This function performs hyperparameter tuning for regression models.
+    """
 
     pipeline = Pipeline([
         ('scaling', StandardScaler()),
