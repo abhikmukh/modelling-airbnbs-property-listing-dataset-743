@@ -12,7 +12,7 @@ from sklearn.metrics import root_mean_squared_error
 import modelling_utils
 
 
-def regression_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> float:
+def regression_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> dict:
     """
     This function performs hyperparameter tuning for regression models.
     """
@@ -42,7 +42,7 @@ def regression_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> float:
     print(f"Baseline model validation loss : {root_mean_squared_error(y_val, y_val_hat)}")
     print(f"Baseline model test loss : {root_mean_squared_error(y_test, y_test_hat)}")
 
-    models = ["DecisionTreeRegressor", "RandomForestRegressor", "GradientBoostingRegressor"]
+    models = ["DecisionTreeRegressor", "RandomForestRegressor", "GradientBoostingRegressor", "LinearRegression"]
     hyperparameter_file = "models/regression_hyperparameters.json"
 
     results = modelling_utils.evaluate_all_models(ml_method="sk_learn_ml",list_of_models=models,
@@ -51,12 +51,17 @@ def regression_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> float:
                                                   task_type="regression")
     print(f"Best model, validation rmse and parameters : {modelling_utils.find_best_model(results)}")
 
-    best_model_dict = modelling_utils.find_best_model(results)
-    best_model = modelling_utils.load_model(best_model_dict[0], "regression")
+    best_model_tuple = modelling_utils.find_best_model(results)
+    best_model = modelling_utils.load_model(best_model_tuple[0], "regression")
     best_model.fit(X_train, y_train)
     y_pred = best_model.predict(X_test)
     print(f"Best model test set rmse : {root_mean_squared_error(y_test, y_pred)}")
     print(f"Best model test set r2_score : {r2_score(y_test, y_pred)}")
     print(f"Best model test set mae : {mean_absolute_error(y_test, y_pred)}")
     print(f"Best model test set mse : {mean_squared_error(y_test, y_pred)}")
-    return mean_squared_error(y_test, y_pred)
+    result_dict = {"test_rmse_loss": root_mean_squared_error(y_test, y_pred),
+                   "test_r2_score": r2_score(y_test, y_pred),
+                   "test_mae_loss": mean_absolute_error(y_test, y_pred),
+                   "test_mse_loss": mean_squared_error(y_test, y_pred),
+                   "best_model": best_model}
+    return result_dict

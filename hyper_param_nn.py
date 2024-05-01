@@ -26,7 +26,7 @@ RAY_CHDIR_TO_TRIAL_DIR = 0
 class NN(torch.nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, output_size=1):
         super().__init__()
-
+        self.dropout = torch.nn.Dropout(0.2)
         internal_layers = [torch.nn.Linear(input_size, hidden_size), torch.nn.ReLU()]
         for _ in range(num_layers - 2):
             internal_layers.append(torch.nn.Linear(hidden_size, hidden_size))
@@ -36,7 +36,9 @@ class NN(torch.nn.Module):
         self.double()
 
     def forward(self, X):
-        return self.layers(X)
+        X = self.dropout(X)
+        X = self.layers(X)
+        return X
 
 
 def load_data(torch_dataset):
@@ -75,7 +77,7 @@ def train_loop(config, data_set, checkpoint_dir=None):
     )
     nn_model.train()
     print(f"model parameters: {nn_model.parameters()}")
-    for epoch in range(10):  # loop over the dataset multiple times
+    for epoch in range(100):  # loop over the dataset multiple times
         running_loss = 0.0
         epoch_steps = 0
         for batch in trainloader:
@@ -95,7 +97,6 @@ def train_loop(config, data_set, checkpoint_dir=None):
 
         # Validation loss
         val_loss = 0.0
-        val_steps = 0
 
         for batch in valloader:
             with torch.no_grad():
@@ -103,11 +104,10 @@ def train_loop(config, data_set, checkpoint_dir=None):
                 prediction = nn_model(features)
                 _, predicted = torch.max(prediction.data, 1)
 
-                loss = torch.nn.functional.mse_loss(prediction, labels.unsqueeze(1))
-                val_loss += loss.cpu().numpy()
-                val_steps += 1
+                val_loss += torch.nn.functional.mse_loss(prediction, labels.unsqueeze(1)).item()
+        val_loss /= len(valloader.dataset)
         #  communication with Ray Tune
-        metrics = {"loss": val_loss / val_steps}
+        metrics = {"loss": val_loss}
         with tempfile.TemporaryDirectory() as checkpoint_dir:
             with open(os.path.join(checkpoint_dir, 'data.pkl'), 'wb') as fp:
                 pickle.dump({'data': 'value'}, fp)
@@ -123,7 +123,7 @@ def test_accuracy(model, data_set):
     airbnb_dataset = data_set
     trainset, testset = load_data(airbnb_dataset)
     testloader = torch.utils.data.DataLoader(
-        testset, batch_size=4, shuffle=False,
+        testset, batch_size=64, shuffle=False,
     )
     test_mse_loss = 0
     test_mae_loss = 0
@@ -140,16 +140,16 @@ def test_accuracy(model, data_set):
             print(f"Test loss: {test_mse_loss:>7f}")
     end = timer()
     inference_latency = end - start
-    test_mse_loss /= len(testloader)
-    test_mae_loss /= len(testloader)
-    test_r2_score /= len(testloader)
+    test_mse_loss /= len(testloader.dataset)
+    test_mae_loss /= len(testloader.dataset)
+    test_r2_score /= len(testloader.dataset)
 
     metrics_dict = {"test_mse_loss": test_mse_loss, "test_mae_loss": test_mae_loss,
                     "test_r2_score": test_r2_score, "inference_latency": inference_latency}
     return metrics_dict
 
 
-def neural_net_hyper_param_tune(data_dir, data_set, num_samples=10, max_num_epochs=10):
+def neural_net_hyper_param_tune(data_dir, data_set, num_samples, max_num_epochs):
     data_dir = os.path.abspath(data_dir)
     features, _ = data_set[0]
     input_size = list(features.shape)[0]

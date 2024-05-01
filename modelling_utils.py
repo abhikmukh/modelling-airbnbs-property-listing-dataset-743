@@ -10,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
     GradientBoostingRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.linear_model import SGDRegressor
+from sklearn.linear_model import LinearRegression
 
 from enum import Enum
 
@@ -87,7 +88,7 @@ def evaluate_all_models(list_of_models, params, X_train, y_train, X_val, y_val,
     return results_dict
 
 
-def find_best_model(result_dict):
+def find_best_model(result_dict: dict) -> tuple:
     """Finds the best model from a dictionary of results."""
     best_score = np.inf
     best_performing_model = None

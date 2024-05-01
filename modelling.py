@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     classification_accuracy_score = classification_hyper_tune(features_classification, label_classification)
     regression_mse_loss = regression_hyper_tune(features_regression, label_regression)
-    nn_regression_mse_loss = neural_net_hyper_param_tune(num_samples=10, max_num_epochs=10,
+    nn_regression_mse_loss = neural_net_hyper_param_tune(num_samples=10, max_num_epochs=200,
                                                          data_dir="./data", data_set=torch_data_set)
 
     print(f"Classification accuracy score : {classification_accuracy_score}")
