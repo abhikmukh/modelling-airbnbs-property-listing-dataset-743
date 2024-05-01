@@ -18,7 +18,7 @@ def create_inputs_for_ml(
     list_of_columns_to_drop: list = None,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
-    This function creates the features and labels for the ml model.
+    This function creates the features and labels for the ml model. column to encode is the column to one hot encode.
     """
     np.random.seed(42)
     df = pd.read_csv(os.path.join(data_dir, csv_data))
