@@ -28,9 +28,9 @@ def create_inputs_for_ml(
         df_hot_encoded = pd.get_dummies(df[column_to_encode])
         df = pd.concat([df, df_hot_encoded], axis=1)
         df.drop(columns=column_to_encode, inplace=True)
-        X, y = load_airbnb_data(df, label_column)
-        X = X.select_dtypes(include=np.number)
-        return X, y
+    X, y = load_airbnb_data(df, label_column)
+    X = X.select_dtypes(include=np.number)
+    return X, y
 
 
 class AirbnbNightlyPriceRegressionDataset(Dataset):
@@ -94,5 +94,5 @@ if __name__ == "__main__":
         num_samples=10, max_num_epochs=10, data_dir="./data", data_set=torch_data_set
     )
 
-    print(f"Regression mse loss : {regression_mse_loss}")
-    print(f"Neural network regression mse loss : {nn_regression_mse_loss}")
+    print(f"ML Regression results : {regression_mse_loss}")
+    print(f"Neural network regression results : {nn_regression_mse_loss}")

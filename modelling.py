@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 import torch
 
 from scripts.hyper_param_nn import neural_net_hyper_param_tune
-from scripts.tabular_data import load_airbnb_data
+from utils.tabular_data import load_airbnb_data
 from scripts.classification import classification_hyper_tune
 from scripts.regression import regression_hyper_tune
 
@@ -22,16 +22,19 @@ def create_inputs_for_ml(
     This function creates the features and labels for the ml model.
     """
     np.random.seed(42)
+
     df = pd.read_csv(os.path.join(data_dir, csv_data))
+    print(df.head())
     if list_of_columns_to_drop is not None:
         df.drop(columns=list_of_columns_to_drop, inplace=True)
+        print(df.shape)
     if column_to_encode is not None:
         df_hot_encoded = pd.get_dummies(df[column_to_encode])
         df = pd.concat([df, df_hot_encoded], axis=1)
         df.drop(columns=column_to_encode, inplace=True)
-        X, y = load_airbnb_data(df, label_column)
-        X = X.select_dtypes(include=np.number)
-        return X, y
+    X, y = load_airbnb_data(df, label_column)
+    X = X.select_dtypes(include=np.number)
+    return X, y
 
 
 class AirbnbNightlyPriceRegressionDataset(Dataset):
@@ -101,3 +104,5 @@ if __name__ == "__main__":
     print(f"Classification accuracy score : {classification_accuracy_score}")
     print(f"Regression mse loss : {regression_mse_loss}")
     print(f"Neural network regression mse loss : {nn_regression_mse_loss}")
+    print(f"ML Regression results : {regression_mse_loss}")
+    print(f"Neural network regression results : {nn_regression_mse_loss}")

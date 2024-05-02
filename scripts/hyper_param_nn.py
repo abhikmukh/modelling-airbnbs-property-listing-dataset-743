@@ -152,7 +152,7 @@ def test_accuracy(model: type[torch.nn], data_set: Dataset) -> dict[str, float]:
     return metrics_dict
 
 
-def neural_net_hyper_param_tune(data_dir: str, data_set: Dataset, num_samples: int, max_num_epochs: int) -> float:
+def neural_net_hyper_param_tune(data_dir: str, data_set: Dataset, num_samples: int, max_num_epochs: int) -> dict:
     """
     This function tunes the hyperparameters of a neural network model using ray tune.
     """
@@ -198,13 +198,13 @@ def neural_net_hyper_param_tune(data_dir: str, data_set: Dataset, num_samples: i
     test_metrics_dict = test_accuracy(best_trained_model, data_set)
 
     print(f"Best trial test set mse: {test_metrics_dict['test_mse_loss']}")
-    print(f"Best model's test metrics {test_metrics_dict}")
+    print(f"Best Neural Network model's test metrics {test_metrics_dict}")
 
     t = time.localtime()
     timestamp = time.strftime('%b-%d-%Y_%H%M', t)
     save_model(ml_method="torch_nn", model=best_trained_model, best_hyperparams=best_trial.config,
                metrics=test_metrics_dict, task_type="regression", time_stamp=timestamp)
 
-    return test_metrics_dict['test_mse_loss']
+    return test_metrics_dict
 
 
