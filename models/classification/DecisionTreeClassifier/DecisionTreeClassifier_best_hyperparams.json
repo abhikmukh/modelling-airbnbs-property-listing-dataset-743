@@ -1,1 +1,1 @@
-{"ccp_alpha": 0.1, "criterion": "gini", "max_depth": 5}
+{"ccp_alpha": 0.01, "criterion": "entropy", "max_depth": 7}

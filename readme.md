@@ -17,19 +17,23 @@ Airbnb categories) & regression (predicting tariff) use cases.
 ## How to run
 modelling.py calls three scripts classification.py, regression.py and hyper_nn.py and runs the whole pipeline.
 modelling_utils.py contains all the modelling related functions used in the scripts and eda_utils.py has other util functions. tabular_data.py does the cleaning
-reuse_pipeline.py is used to predict the target "bedrooms" using the automated framework created in the project.
-data_analysis.ipynb contains the initial exploratory data analysis. 
+reuse_pipeline.py is used to test the automated framework for another target.
+data_analysis.ipynb contains the initial exploratory data analysis, regression_results and classification_results notebook has analysis of the regression and classification results, respectively.
 
 ## Results
-In this specific experiment, "bedrooms" was used as target and the results are below. 
+In this specific regression task, "Price_Night" was used as target and the results are below. "Category" column was used to test the classification task.
+
+### Regression 
+Metrics values and plots
 ```
-ML Regression results : {'test_rmse_loss': 0.41697000614706686, 'test_r2_score': 0.6807109823101994, 'test_mae_loss': 0.2395641251929442, 'test_mse_loss': 0.173863986026285, 'best_model': RandomForestRegressor(max_depth=10, n_es
-timators=400)}
-Neural network regression results : {'test_mse_loss': 0.16638953022242145, 'test_mae_loss': 0.05562919994371747, 'test_r2_score': -0.5977739877370789, 'inference_latency': 0.24250259998370893}
+ML Regression results : {'test_rmse_loss': 49.995952471964316, 'test_r2_score': 0.1970015139823903, 'test_mae_loss': 38.16579131967172, 'test_mse_loss': 2499.5952635789145, 'best_model': GradientBoostingRegressor(max_depth=2, mi
+n_samples_leaf=8, min_samples_split=10)}
+Neural network regression results : {'test_mse_loss': 303.77952243829753, 'test_mae_loss': 2.420852101053996, 'test_r2_score': -0.21090976736368292, 'inference_latency': 0.19866510000429116}
 ```
+![scatter_plot](screenshots/scatter_plot.png) | ![residual_plot](screenshots/residual_plot.png) | ![shapley_plot](screenshots/shapley_plot.png)
 
 ## tensorboard images of hyper parameter tuning
-Below are loss plot and paralell coordinates plot for hyperparameter tuning 
+Below are loss plot and parallel coordinates plot for hyperparameter tuning 
 
 ![hyper_nn](screenshots/ray_tune1.PNG)
 ![hyper_nn](screenshots/tf1.PNG)

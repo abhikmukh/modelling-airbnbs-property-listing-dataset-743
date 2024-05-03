@@ -57,7 +57,7 @@ def classification_hyper_tune(features: pd.DataFrame, label: pd.DataFrame) -> fl
         "GradientBoostingClassifier",
         "DecisionTreeClassifier",
     ]
-    hyperparameter_file = "models/test_classification.json"
+    hyperparameter_file = "models/classification_hyperparameters.json"
     results = modelling_utils.evaluate_all_models(
         ml_method="sk_learn_ml",
         list_of_models=models,
