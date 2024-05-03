@@ -61,8 +61,8 @@ Hyperparameter training in ray tune
 
 Tensorboard plots
 <p>
-  <img src="screenshots/tf2.PNG" width="400" />
-  <img src="screenshots/tf1.PNG" width="400" /> 
+  <img src="screenshots/tf2.PNG" width="800" />
+  <img src="screenshots/tf1.PNG" width="800" /> 
 </p>
 
 
