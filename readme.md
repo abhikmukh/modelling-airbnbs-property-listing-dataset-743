@@ -30,7 +30,11 @@ ML Regression results : {'test_rmse_loss': 49.995952471964316, 'test_r2_score': 
 n_samples_leaf=8, min_samples_split=10)}
 Neural network regression results : {'test_mse_loss': 303.77952243829753, 'test_mae_loss': 2.420852101053996, 'test_r2_score': -0.21090976736368292, 'inference_latency': 0.19866510000429116}
 ```
-![scatter_plot](screenshots/scatter_plot.png) | ![residual_plot](screenshots/residual_plot.png) | ![shapley_plot](screenshots/shapley_plot.png)
+<p>
+  <img src="screenshots/scatter_plot.png" width="220" />
+  <img src="screenshots/residual_plot.png" width="220" /> 
+  <img src="screenshots/shapley_plot.png" width="220" />
+</p>
 
 ## tensorboard images of hyper parameter tuning
 Below are loss plot and parallel coordinates plot for hyperparameter tuning 
