@@ -24,11 +24,12 @@ data_analysis.ipynb contains the initial exploratory data analysis, regression_r
 In this specific regression task, "Price_Night" was used as target and the results are below. "Category" column was used to test the classification task.
 
 ### Regression 
-Metrics values and plots
+Metrics values and plots (scatter plots of actual and predicted values, residual plots and shapley value plots showing the impact of features on prediction)
 ```
-ML Regression results : {'test_rmse_loss': 49.995952471964316, 'test_r2_score': 0.1970015139823903, 'test_mae_loss': 38.16579131967172, 'test_mse_loss': 2499.5952635789145, 'best_model': GradientBoostingRegressor(max_depth=2, mi
-n_samples_leaf=8, min_samples_split=10)}
-Neural network regression results : {'test_mse_loss': 303.77952243829753, 'test_mae_loss': 2.420852101053996, 'test_r2_score': -0.21090976736368292, 'inference_latency': 0.19866510000429116}
+mean_absolute_error: 37.52507797824936
+mean_squared_error: 2376.7742701524608
+root_mean_squared_error: 48.75217195318031
+r2_score: -1.8189761527487125
 ```
 <p>
   <img src="screenshots/scatter_plot.png" width="220" />
@@ -36,10 +37,32 @@ Neural network regression results : {'test_mse_loss': 303.77952243829753, 'test_
   <img src="screenshots/shapley_plot.png" width="220" />
 </p>
 
-## tensorboard images of hyper parameter tuning
-Below are loss plot and parallel coordinates plot for hyperparameter tuning 
+### Classification
+Metrics value and confusion matrix
+```
+Accuracy of best classification model on test data : 0.38235294117647056
+Precision of best classification model on test data : 0.3814112766318649
+Recall of best classification model on test data : 0.38235294117647056
+F1 score of best classification model on test data : 0.38022412874614514
 
+```
+Confusion matrix
+![confusion_matrix](screenshots/confusion_matrix.png)
+### Results of neural network modelling
+Below are loss plot and parallel coordinates plot for hyperparameter tuning 
+```
+'test_mse_loss': 303.77952243829753, 
+'test_mae_loss': 2.420852101053996, 
+'test_r2_score': -0.21090976736368292, 
+'inference_latency': 0.19866510000429116
+```
+Hyperparameter training in ray tune
 ![hyper_nn](screenshots/ray_tune1.PNG)
-![hyper_nn](screenshots/tf1.PNG)
-![hyper_nn](screenshots/tf2.PNG)
+
+Tensorboard plots
+<p>
+  <img src="screenshots/tf2.PNG" width="250" />
+  <img src="screenshots/tf1.PNG" width="250" /> 
+</p>
+
 
