@@ -105,7 +105,7 @@ def train_loop(config: dict, data_set: Dataset, checkpoint_dir: str = None) -> N
                 _, predicted = torch.max(prediction.data, 1)
 
                 val_loss += torch.nn.functional.mse_loss(prediction, labels.unsqueeze(1)).item()
-        val_loss /= len(val_loader.dataset)
+        val_loss /= len(val_loader)
         #  communication with Ray Tune
         metrics = {"loss": val_loss}
         with tempfile.TemporaryDirectory() as checkpoint_dir:
@@ -143,9 +143,9 @@ def test_accuracy(model: type[torch.nn], data_set: Dataset) -> dict[str, float]:
             print(f"Test loss: {test_mse_loss:>7f}")
     end = timer()
     inference_latency = end - start
-    test_mse_loss /= len(test_loader.dataset)
-    test_mae_loss /= len(test_loader.dataset)
-    test_r2_score /= len(test_loader.dataset)
+    test_mse_loss /= len(test_loader)
+    test_mae_loss /= len(test_loader)
+    test_r2_score /= len(test_loader)
 
     metrics_dict = {"test_mse_loss": test_mse_loss, "test_mae_loss": test_mae_loss,
                     "test_r2_score": test_r2_score, "inference_latency": inference_latency}
